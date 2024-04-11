@@ -27,8 +27,25 @@ def index_articles():
 
 @app.route('/articles/<int:id>')
 def show_article(id):
+    # Initialize session['page_views'] to 0 if it doesn't exist
+    session['page_views'] = session.get('page_views', 0)
 
-    pass
+    # Increment page_views by 1 for each request
+    session['page_views'] += 1
+
+    # Check if page_views is greater than 3
+    if session['page_views'] > 3:
+        # Render JSON response with error message and status code 401
+        return jsonify({'message': 'Maximum pageview limit reached'}), 401
+    else:
+        # Fetch article data from database
+        article = Article.query.get(id)
+        # Render JSON response with article data
+        return jsonify({
+            'id': article.id,
+            'title': article.title,
+            'content': article.content
+        })
 
 if __name__ == '__main__':
     app.run(port=5555)
